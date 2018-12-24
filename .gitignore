@@ -1,0 +1,13 @@
+key.py
+cfs.json
+neighborhood2*
+neighborhood**
+Pipfile*
+Piplock*
+*.csv
+**.csv
+**.pkl
+**.zip
+*.zip
+*.pkl
+**.geojson
