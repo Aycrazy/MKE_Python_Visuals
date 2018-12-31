@@ -1,0 +1,1 @@
+http://maps2.milwaukee.gov/ArcGIS/rest/services/geocode/MAIthenDIME_geocode/GeocodeServer/findAddressCandidates?Street=3820+North+Humboldt+BL&SingleLine=&outFields=Loc_name&outSR=&f=json"

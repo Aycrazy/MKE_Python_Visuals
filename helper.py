@@ -22,6 +22,8 @@ def pull_data(url, record_id, api_key, u_text = False):
 
     df = pd.DataFrame()
 
+    #for r_id in record_id:
+
     while not empty:
 
         print('offset'+ str(offset))
@@ -33,31 +35,36 @@ def pull_data(url, record_id, api_key, u_text = False):
         #soup = BeautifulSoup(records.content,'html.parser')
         records = records.json()
 
-        #print
+        print(records['success'])
 
         offset+=50000
 
-        if u_text == 1:
+        if records['success'] == True:
+
+            # if u_text:
+
+            #     if not len(pd.DataFrame(records)['result']['records']):
+            #         return df
+            #     else:
+            #         df = df.append(pd.DataFrame(pd.io.json.json_normalize(records)['result']['records']))
+
+            # else:
 
             if not len(pd.DataFrame(records)['result']['records']):
                 return df
             else:
-                df = df.append(pd.DataFrame(pd.io.json.json_normalize(records)['result']['records']))
+                new_df = pd.DataFrame(records['result']['records'])
+                df = df.append(new_df)
+        else:
+            return df
+            # else:
 
-        elif u_text == 2:
+            #     print(pd.DataFrame(pd.read_json(soup.contents[0])).loc['records'].loc['result'][1])
 
-            if not len(pd.DataFrame(records)['result']['records']):
-                return df
-            else:
-                df = df.append(pd.DataFrame(records['result']['records']))
-        # else:
-
-        #     print(pd.DataFrame(pd.read_json(soup.contents[0])).loc['records'].loc['result'][1])
-
-        #     if not len(pd.DataFrame(pd.read_json(soup.contents[0])).loc['result'].loc['records']):
-        #         return df
-        #     else:
-        #         df = df.append(pd.DataFrame(pd.read_json(soup.contents[0]).loc['result'].loc['records']))
+            #     if not len(pd.DataFrame(pd.read_json(soup.contents[0])).loc['result'].loc['records']):
+            #         return df
+            #     else:
+            #         df = df.append(pd.DataFrame(pd.read_json(soup.contents[0]).loc['result'].loc['records']))
 
 
 lead_sl = 'c8c72ec0-8331-4ccb-949b-bd284d0054db'
