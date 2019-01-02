@@ -1,6 +1,9 @@
 key.py
 cfs.json
-neighborhood2*
+neighborhood2.cpg
+neighborhood2.dbf
+neighborhood2.prj
+neighborhood2.shx
 neighborhood**
 Pipfile*
 Piplock*
