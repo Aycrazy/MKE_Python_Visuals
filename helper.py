@@ -26,7 +26,7 @@ def pull_data(url, record_id, api_key, u_text = False):
 
     while not empty:
 
-        print('offset'+ str(offset))
+        #print('offset'+ str(offset))
 
         url_adj = url+record_id+'&limit='+limit+'&offset='+str(offset)
 
@@ -35,7 +35,7 @@ def pull_data(url, record_id, api_key, u_text = False):
         #soup = BeautifulSoup(records.content,'html.parser')
         records = records.json()
 
-        print(records['success'])
+        #print(records['success'])
 
         offset+=50000
 
