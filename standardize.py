@@ -355,9 +355,10 @@ def add_year_month_day_dfs(dict_of_dfs, date_col, date_pre):
         df[date_pre+'Day']= df[date_col].apply(lambda x: pd.to_datetime(x).dayofweek)
 
 def add_year_month_day_df(df, date_col, date_pre):
-    df[date_pre+'Year']= df[date_col].apply(lambda x: pd.to_datetime(x).year)
-    df[date_pre+'Month']= df[date_col].apply(lambda x: pd.to_datetime(x).month)
-    df[date_pre+'Day']= df[date_col].apply(lambda x: pd.to_datetime(x).dayofweek)
+    df[date_pre+'_dtime'] = df[date_col].apply(lambda x: try: pd.to_datetime(x) except: None)
+    df[date_pre+'Year'] = df[date_col].apply(lambda x: try: pd.to_datetime(x).year except: None)
+    df[date_pre+'Month'] = df[date_col].apply(lambda x: try:  pd.to_datetime(x).month except: None)
+    df[date_pre+'Day'] = df[date_col].apply(lambda x: try:  pd.to_datetime(x).dayofweek except: None)
 
 def make_barh_dfs(dict_of_dfs, month_col, item_col, pro_title):
     for jurisdiction, df in dict_of_dfs.items():
