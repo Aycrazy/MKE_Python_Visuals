@@ -7,11 +7,27 @@ import numpy as np
 import io
 #import geocoder
 #import geopandas as gp
+import math
 import csv 
 import json
 import matplotlib
 import seaborn
 from matplotlib import pyplot as plt
+import bokeh as bo
+from helper import *
+import matplotlib as mp
+import matplotlib.pyplot as plt
+import seaborn
+import os
+import re
+from bokeh.io import export_png
+from bokeh.plotting import figure, show, output_file
+from bokeh.io import output_notebook
+from bokeh.palettes import Category20
+from bokeh.palettes import Spectral6
+from bokeh.transform import factor_cmap
+from bokeh.models import ColumnDataSource, HoverTool, Cross
+from math import pi
 
 import multiprocessing as mp
 
@@ -355,10 +371,37 @@ def add_year_month_day_dfs(dict_of_dfs, date_col, date_pre):
         df[date_pre+'Day']= df[date_col].apply(lambda x: pd.to_datetime(x).dayofweek)
 
 def add_year_month_day_df(df, date_col, date_pre):
-    df[date_pre+'_dtime'] = df[date_col].apply(lambda x: try: pd.to_datetime(x) except: None)
-    df[date_pre+'Year'] = df[date_col].apply(lambda x: try: pd.to_datetime(x).year except: None)
-    df[date_pre+'Month'] = df[date_col].apply(lambda x: try:  pd.to_datetime(x).month except: None)
-    df[date_pre+'Day'] = df[date_col].apply(lambda x: try:  pd.to_datetime(x).dayofweek except: None)
+    df[date_pre+'_dtime'] = df[date_col].apply(get_datetime)
+    df[date_pre+'Year'] = df[date_pre+'_dtime'].apply(get_year)
+    df[date_pre+'Month'] = df[date_pre+'_dtime'].apply(get_month)
+    df[date_pre+'Day'] = df[date_pre+'_dtime'].apply(get_day)
+
+def get_datetime(x):
+    try:
+        return pd.to_datetime(x)
+    except:
+        return None
+
+
+def get_year(x):
+    try:
+        return x.year
+    except:
+        return None
+
+
+def get_month(x):
+    try:
+        return x.month
+    except:
+        return None
+
+
+def get_day(x):
+    try:
+        return x.dayofweek
+    except:
+        return None
 
 def make_barh_dfs(dict_of_dfs, month_col, item_col, pro_title):
     for jurisdiction, df in dict_of_dfs.items():
@@ -508,3 +551,88 @@ def make_dummies(df, cat_vars):
         df_new = pd.get_dummies(df[var])
         df = pd.concat([df, df_new], axis=1)
     return df
+
+
+def create_bar_plot(f_name, df_attrs, attr, color, patient=False,
+                    agg_func_col='cts', count_type='Case', count_column_str=False,
+                    alt_num_attr=False, output=False, need_counts=True,
+                    use_factor_map=False, tooltip_captions=[], tooltip_cols=[]):
+    '''
+    use_factor_map = color pallete to use
+    '''
+    #os.chdir("/Users/ayaspan/Documents/Pathology_Project/cancer_distros/casesets")
+
+    #count_type = 'Case'
+
+
+#     if alt_num_attr:
+#         df_counts = count_by_column(df_attrs,alt_num_attr)
+#     else:
+#         df_counts = count_by_column(df_attrs,attr,True)
+
+    if need_counts:
+
+        df_attrs = count_by_column(df_attrs, attr)
+
+    #print(df_attrs.head())
+
+    if patient:
+        count_type = 'Patient'
+
+    TOOLTIPS = create_tooltip(tooltip_captions, tooltip_cols)
+
+    print(df_attrs)
+
+    source = ColumnDataSource(data=dict(attr_x=df_attrs[attr], cts=np.array(df_attrs[agg_func_col]),
+                                        name=df_attrs[attr].astype(str)))
+
+    print(name[0].upper()+name[1:])
+
+    if not len(TOOLTIPS):
+        TOOLTIPS = False
+
+    p = figure(x_range=df_attrs[attr], plot_width=400, plot_height=400, toolbar_location=None,
+               title=f_name[0].upper()+f_name[1:],
+               tooltips=TOOLTIPS)
+
+    if use_factor_map:
+        use_colors = factor_cmap(
+            'name', palette=use_factor_map, factors=df_attrs[attr])
+    else:
+        use_colors = color
+
+    p.vbar(x='name', width=.9, bottom=0, source=source,
+           top='cts', fill_color=use_colors)
+
+    p.xaxis.major_label_orientation = pi/2.7
+
+    if output:
+        output_notebook()
+        show(p)
+        f_name = f_name+"_"+count_type+"_"+"plot.html"
+        output_file(filename=f_name)
+    else:
+        export_png(p, filename=f_name+"_"+count_type+"_"+"plot.png")
+
+'''create_bar_plot("Average Time to Close by Complaint Type:", type_means_df,'Category1', count_type="Mean",
+                agg_func_col ='Days_to_Close' , color = False, output=True, use_factor_map=Category20[type_means_df.shape[0]],
+                need_counts=False, tooltip_captions = ['Case Type','Mean Time'], tooltip_cols = ['name','cts days']) example usage'''
+
+
+def create_tooltip(tooltip_captions, tooltip_cols):
+    return [(tcap, '@'+tcol) for tcap, tcol in zip(tooltip_captions, tooltip_cols)]
+
+
+def create_year_str(df, year_col):
+    return df[year_col].apply(lambda x: str(x).replace('.0', '') if not math.isnan(x) else 'None')
+
+
+def count_by_column(df, count_column, count_column_str=False):
+    new_df = df[count_column].value_counts().to_frame().reset_index().rename(
+    	columns={'index': count_column, count_column: 'cts'})
+    if count_column_str:
+        return new_df.sort_values(by=float(count_column))
+    else:
+        new_df[count_column.replace(
+            'str', 'int')] = new_df[count_column].astype(int)
+        return new_df.sort_values(by=count_column.replace('str', 'int'))
