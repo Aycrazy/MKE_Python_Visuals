@@ -553,10 +553,17 @@ def make_dummies(df, cat_vars):
     return df
 
 
+def get_doy(row):
+    
+    return ['Sunday','Monday','Tuesday','Wednesday','Thursday',\
+        'Friday','Saturday'][int(row)]
+
+
 def create_bar_plot(f_name, df_attrs, attr, color, patient=False,
                     agg_func_col='cts', count_type='Case', count_column_str=False,
                     alt_num_attr=False, output=False, need_counts=True,
-                    use_factor_map=False, tooltip_captions=[], tooltip_cols=[]):
+                    use_factor_map=False, tooltip_captions=[], tooltip_cols=[],
+                    days_of_week=False):
     '''
     use_factor_map = color pallete to use
     '''
@@ -581,12 +588,15 @@ def create_bar_plot(f_name, df_attrs, attr, color, patient=False,
 
     TOOLTIPS = create_tooltip(tooltip_captions, tooltip_cols)
 
-    print(df_attrs)
 
     source = ColumnDataSource(data=dict(attr_x=df_attrs[attr], cts=np.array(df_attrs[agg_func_col]),
                                         name=df_attrs[attr].astype(str)))
+    
+    if days_of_week:
 
-    print(name[0].upper()+name[1:])
+        source = ColumnDataSource(data=dict(attr_x=df_attrs[attr], cts=np.array(df_attrs[agg_func_col]),
+                                        name=df_attrs[attr].apply(get_doy)))
+    #print(name[0].upper()+name[1:])
 
     if not len(TOOLTIPS):
         TOOLTIPS = False

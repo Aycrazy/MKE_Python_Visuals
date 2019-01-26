@@ -14,3 +14,4 @@ Piplock*
 *.zip
 *.pkl
 **.geojson
+**plot.html

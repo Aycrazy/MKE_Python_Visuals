@@ -1,0 +1,7 @@
+
+urllib3
+pandas
+numpy 
+matplotlib
+seaborn
+bokeh
